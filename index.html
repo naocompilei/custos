@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Multi Express — Gestão Financeira Farma</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -694,6 +693,26 @@
   </div>
 
 </div><!-- /app -->
+
+<script>
+// Chart.js com fallback de CDN
+(function() {
+  function loadScript(src, cb) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = cb;
+    s.onerror = function() { cb(new Error('failed: ' + src)); };
+    document.head.appendChild(s);
+  }
+  var primary = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+  var fallback = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
+  loadScript(primary, function(err) {
+    if (err || typeof Chart === 'undefined') {
+      loadScript(fallback, function() {});
+    }
+  });
+})();
+</script>
 
 <script>
 const FILIAIS = ['XAP','JBA','CRI','MFA','FLN','ITA','VIT','TUB','ERE','LGS','TJC','JVE'];
@@ -1532,11 +1551,32 @@ function showTab(t, el) {
 }
 
 // ── Init ──
-seedInitialData();
-seedJaneiro2026();
-renderDashboard();
-loadFiliaisTable();
-document.getElementById('hdr-month').textContent = 'Abril 2026';
+window._appReady = function() {
+  try { seedInitialData(); } catch(e) { console.warn('seed:', e); }
+  try { seedJaneiro2026(); } catch(e) { console.warn('seedJan:', e); }
+  try { renderDashboard(); } catch(e) { console.warn('dash:', e); }
+  try { loadFiliaisTable(); } catch(e) { console.warn('filiais:', e); }
+  try { renderParceiros(); } catch(e) {}
+  var el = document.getElementById('hdr-month');
+  if (el) el.textContent = 'Abril 2026';
+};
+</script>
+
+<script>
+(function() {
+  function tryInit() { if (typeof window._appReady === 'function') window._appReady(); }
+  function loadJs(src, next) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = function() { if (typeof Chart !== 'undefined') tryInit(); else if(next) loadJs(next); };
+    s.onerror = function() { if(next) loadJs(next); };
+    document.body.appendChild(s);
+  }
+  loadJs(
+    'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js'
+  );
+})();
 </script>
 </body>
 </html>
