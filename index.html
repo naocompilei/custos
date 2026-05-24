@@ -755,6 +755,8 @@ function showTab(t, el) {
   if (t === 'dashboard') renderDashboard();
   if (t === 'filiais') loadFiliaisTable();
   if (t === 'historico') renderHistorico();
+  if (t === 'faturamento') renderFaturamentoBases();
+  if (t === 'parceiros') renderParceiros();
 }
 
 // ── Load / Save Month ──
@@ -955,7 +957,7 @@ function renderDashboard() {
   months.forEach((d,i) => {
     const prev = months[i-1];
     const diff = prev ? (d.pct - prev.pct) : null;
-    const diffHtml = diff !== null ? `<span class="${diff>=0?'diff-up':'diff-dn'}"> ${diff>=0?'▲':'▼'}${Math.abs(diff).toFixed(2)}pp</span>` : '';
+    const diffHtml = diff !== null ? '<span class="' + (diff>=0?'diff-up':'diff-dn') + '"> ' + (diff>=0?'▲':'▼') + Math.abs(diff).toFixed(2) + 'pp</span>' : '';
     tbody.innerHTML += `<tr>
       <td style="font-weight:600;">${d.m}/${year}</td>
       <td>${fmtR(d.fat)}</td>
@@ -974,9 +976,9 @@ function renderDashboard() {
   destroyChart('chartComp');
   charts['chartComp'] = new Chart(document.getElementById('chartComp'), {
     type: 'doughnut',
-    data: { labels:['Impostos','Transferência','B. Próprias','B. Terceirizadas','Espec. Farma'],
+    data: { labels:['Impostos','Transfer.','B. Proprias','B. Terc.','Espec. Farma'],
       datasets:[{ data:[Math.round(last.imp),Math.round(last.transf),Math.round(last.bp),Math.round(last.bt),Math.round(last.espec)],
-        backgroundColor:['#185FA5','#1D9E75','#D85A30','#7F77DD','#D4537E'], borderWidth:2, borderColor:'var(--surface)' }] }
+        backgroundColor:['#185FA5','#1D9E75','#D85A30','#7F77DD','#D4537E'], borderWidth:2, borderColor:'#ffffff' }]
     },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }
   });
@@ -1534,20 +1536,6 @@ function seedJaneiro2026() {
       },
     ]);
   }
-}
-
-// Extend showTab to handle new panels
-const _origShowTab = showTab;
-function showTab(t, el) {
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  if (el) el.classList.add('active');
-  document.getElementById('panel-'+t).classList.add('active');
-  if (t === 'dashboard') renderDashboard();
-  if (t === 'filiais') loadFiliaisTable();
-  if (t === 'historico') renderHistorico();
-  if (t === 'faturamento') renderFaturamentoBases();
-  if (t === 'parceiros') renderParceiros();
 }
 
 // ── Init ──
